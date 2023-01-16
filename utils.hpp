@@ -46,7 +46,8 @@ struct is_integral{ static const bool value = false; };
 
 //Specific cases
 template<>
-struct is_integral<bool>{ static const bool value = true;};
+struct is_integral<bool> 
+{ static const bool value = true;};
 template<>
 struct is_integral<char>{ static const bool value = true;};
 template<>

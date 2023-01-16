@@ -17,25 +17,25 @@ namespace ft
         typedef typename Iter::iterator_category iterator_category;
     };
 
-    template <class Iter>
-    struct iterator_traits<Iter *>
-    {
-        typedef Iter value_type;
-        typedef ptrdiff_t difference_type;
-        typedef typename Iter::iteraetor_category iterator_category;
-        typedef Iter *pointer;
-        typedef Iter &reference;
-    };
+    // template <class Iter>
+    // struct iterator_traits<Iter *>
+    // {
+    //     typedef Iter value_type;
+    //     typedef ptrdiff_t difference_type;
+    //     typedef typename Iter::iteraetor_category iterator_category;
+    //     typedef Iter *pointer;
+    //     typedef Iter &reference;
+    // };
 
-    template <class Iter>
-    struct iterator_traits<const Iter>
-    {
-        typedef Iter value_type;
-        typedef ptrdiff_t difference_type;
-        typedef typename Iter::iterator_category iterator_category;
-        typedef Iter *pointer;
-        typedef Iter &reference;
-    };
+    // template <class Iter>
+    // struct iterator_traits<const Iter>
+    // {
+    //     typedef Iter value_type;
+    //     typedef ptrdiff_t difference_type;
+    //     typedef typename Iter::iterator_category iterator_category;
+    //     typedef Iter *pointer;
+    //     typedef Iter &reference;
+    // };
 }
 
 #endif

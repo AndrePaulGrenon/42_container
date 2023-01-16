@@ -105,8 +105,8 @@ namespace ft
         {
             if (_start != NULL && capacity() > 0)
             {
-                //clear();
-               // std::cout << "DESTROY Start  : " << _start << " capacity : " << _capacity << " - VECTOR ID : " << this << std::endl;
+                for(size_type i = 0; i < size(); i++)
+                    _m_allocator.destroy(_start + i);
                 _m_allocator.deallocate(_start, capacity());
                 _start = NULL;
             }
@@ -126,28 +126,28 @@ namespace ft
         // [ELEMENT ACCESS MEMBER FUNCTIONS[]
         reference operator[](size_type n) 
         { 
-            if (n > capacity() || n < 0)  
-                throw std::out_of_range("Ridiculous ! The index is out of range");
+            // if (n > capacity() || n < 0)  
+            //     throw std::out_of_range("Ridiculous ! The index is out of range");
             return (this->_start[n]); 
         }
 
         const_reference operator[](size_type n) const 
         { 
-            if (n > capacity() || n < 0)  
-                throw std::out_of_range("Ridiculous ! The index is out of range");
+            // if (n > capacity() || n < 0)  
+            //     throw std::out_of_range("Ridiculous ! The index is out of range");
             return (this->_start[n]); 
         }
 
         reference at(size_type n)
         {
-            if (n > _size || n < 0)
-                throw std::out_of_range("Ridiculous ! The index is out of range");
+            // if (n > _size || n < 0)
+            //     throw std::out_of_range("Ridiculous ! The index is out of range");
             return (this->_start[n]);
         }
         const_reference at(size_type n) const
         {
-            if (n > _size || n < 0)
-                throw std::out_of_range("Ridiculous ! The index is out of range");
+            // if (n > _size || n < 0)
+            //     throw std::out_of_range("Ridiculous ! The index is out of range");
             return (this->_start[n]);
         }
         reference front(void) { return (this->_start[0]); }
@@ -223,10 +223,11 @@ namespace ft
                     _m_allocator.construct(&temp[i], _start[i]);
                 }
                 if (_start != NULL && capacity() > 0)
-                    _m_allocator.deallocate(_start, capacity());
+                   _m_allocator.deallocate(_start, capacity());
                 _start = temp;
                 _end = _start + size();
                 _capacity = n;
+
             }
             return;
         }
@@ -238,9 +239,9 @@ namespace ft
             size_type index = position - begin();
             if (size() + 1 > capacity()) {
                 if (capacity() == 0)
-                reserve(1);
+                    reserve(1);
                 else
-                reserve(capacity() * 2);
+                    reserve(capacity() * 2);
             }
             _size++;
             if (index < size()) {
@@ -260,12 +261,13 @@ namespace ft
             size_type index = position - begin();
             if (size() + n > capacity()) {
                 if (capacity() == 0)
-                reserve(n);
-                else {
-                if (size() * 2 >= size() + n)
-                    reserve(size() * 2);
-                else
-                    reserve(size() + n);
+                    reserve(n);
+                else 
+                {
+                    if (size() * 2 >= size() + n)
+                        reserve(size() * 2);
+                    else
+                        reserve(size() + n);
                 }
             }
             for (size_type i = n + size() - 1; i > index + n - 1; i--) {
@@ -283,38 +285,57 @@ namespace ft
         void insert (iterator position, InputIterator first, InputIterator last,
                     typename ft::enable_if<!ft::is_integral<InputIterator>::value>::type * = 0) 
         {
-            //std::cout << "USAGE of INSERT" << std::endl;
-            size_type offset = position - begin();
-            InputIterator tmp = first;
-            difference_type n = last - tmp;
+           
+            try
+            {
+                size_type offset = position - begin();
+                InputIterator tmp = first;
+                difference_type n = last - tmp;
 
-            if (first >= last || position < begin() || position > end())
-                return ;
-            if (size() + n > capacity()) 
-            {
-                //std::cout << "NEEDS to reserve " << std::endl;
-                if (capacity() == 0)
-                    reserve(n);
-                else 
+                if (first >= last || position < begin() || position > end())
+                    return ;
+                //std::cout << " INSERT passes !" << std::endl;
+                if (size() + n > capacity()) 
                 {
-                    if (size() * 2 >= size() + n)
-                        reserve(size() * 2);
-                    else
-                        reserve(size() + n);
+                    //std::cout << "NEEDS to reserve " << std::endl;
+                    if (capacity() == 0)
+                        reserve(n);
+                    else 
+                    {
+                        if (size() * 2 >= size() + n)
+                            reserve(size() * 2);
+                        else
+                            reserve(size() + n);
+                    }
                 }
+                for (size_type i = n + size() - 1; i > offset + n - 1; i--) 
+                {
+                    _m_allocator.construct(&_start[i], _start[i - n]);
+                    _m_allocator.destroy(&_start[i - n]);
+                }
+                for (size_type i = offset; i < offset + n; i++) 
+                {
+                    _m_allocator.construct(&_start[i], *first);
+                    first++;
+                    _size++;
+                }
+                _end = _start + size();
             }
-            for (size_type i = n + size() - 1; i > offset + n - 1; i--) 
+            catch(...)
             {
-                _m_allocator.construct(&_start[i], _start[i - n]);
-                _m_allocator.destroy(&_start[i - n]);
+                if (_start != NULL && capacity() > 0)
+                {
+                    for(size_type i = 0; i < size(); i++)
+                        _m_allocator.destroy(_start + i);
+                        _m_allocator.deallocate(_start, capacity());
+                        _start = NULL;
+                }
+                    _size = 0;
+                    _capacity = 0;
+                    _start = NULL;
+                    _end = NULL;
+                    throw std::bad_alloc();
             }
-            for (size_type i = offset; i < offset + n; i++) 
-            {
-                _m_allocator.construct(&_start[i], *first);
-                first++;
-                _size++;
-            }
-            _end = _start + size();
         };
 
         //SHRINK TO FIT FUNCTION
@@ -337,11 +358,12 @@ namespace ft
             if (position < begin() || position >= end()) 
                 throw std::out_of_range("Invalid iterator passed to erase function");
             size_type pos = position - begin();
-            _m_allocator.destroy(&_start[pos]);
+    
             _size--;
             _end--;
             if (pos < size()) 
             {
+                _m_allocator.destroy(&_start[pos]);
                 for (size_type i = pos; i < size(); i++) 
                 {
                     _m_allocator.construct(&_start[i], _start[i + 1]);
@@ -363,6 +385,7 @@ namespace ft
                 return iterator (first);
             size_type pos_at = first - begin();
             size_type n = last - first;
+            _m_allocator.destroy(_start + pos_at + n);
             for (size_type i = 0; i < size() - n; ++i) 
             {
                 this->_m_allocator.construct(_start + pos_at + i, _start[pos_at + n + i]);
