@@ -51,22 +51,8 @@ namespace ft
     private:
     };
 
-    template <typename T>
-    struct IteratorTraits
-    {
-        // Define the types for the iterator's value, difference, pointer, and reference.
-        typedef T value_type;
-        typedef typename std::ptrdiff_t difference_type;
-        typedef T *pointer;
-        typedef T &reference;
-
-        // Specify the iterator category as std::random_access_iterator_tag.
-        typedef random_access_iterator_tag iterator_category;
-    };
-
-
     template <class T>
-    struct Iterator
+    struct Iterator 
     {
 
         typedef std::size_t size_type;
@@ -267,10 +253,10 @@ namespace ft
 
     public:
         typedef IteratorType                                            iterator_type;
-        typedef typename iterator_traits<iterator_type>::value_type      value_type;
-        typedef typename iterator_traits<iterator_type>::difference_type difference_type;
-        typedef typename iterator_traits<iterator_type>::reference       reference;
-        typedef typename iterator_traits<iterator_type>::pointer         pointer;
+        typedef typename IteratorTraits<iterator_type>::value_type      value_type;
+        typedef typename IteratorTraits<iterator_type>::difference_type difference_type;
+        typedef typename IteratorTraits<iterator_type>::reference       reference;
+        typedef typename IteratorTraits<iterator_type>::pointer         pointer;
 
         reverse_iterator(IteratorType it) : _current(it) {}
 

@@ -68,19 +68,14 @@ namespace ft
 
         vector(const vector &x) : _m_allocator(x._m_allocator), _size(0), _capacity(0)
         {
-            //std::cout << "COPY CONSTRUCTOR on - VECTOR ID : " << this << " USING ID : " << &x << std::endl;
             assign(x.begin(), x.end());
             return;
         }
 
         vector& operator=(const vector& other)
         {
-            //_m_allocator = other.get_allocator();
-            //std::cout << "ASSIMGMENT of  : " << this << " using ID" << &other << std::endl;
             if (_start != NULL && capacity() > 0)
             {
-                //std::cout << "         --- memory has been destroyed" << std::endl;
-                //clear();
                 _m_allocator.deallocate(_start, capacity());
             }
             _start = NULL;
@@ -99,7 +94,6 @@ namespace ft
             _size = other.size();
             return *this;
         }
-
 
         ~vector()
         {
