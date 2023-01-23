@@ -9,7 +9,6 @@
 #include <algorithm>
 #include "utility.hpp"
 #include "iterators.hpp"
-#include "utils.hpp"
 
 namespace ft
 {
@@ -18,7 +17,6 @@ namespace ft
     {
     public:
         // [ DEFINITIONS ]
-
         typedef T value_type;
         typedef Allocator allocator_type;
         typedef std::size_t size_type;
@@ -120,28 +118,28 @@ namespace ft
         // [ELEMENT ACCESS MEMBER FUNCTIONS[]
         reference operator[](size_type n) 
         { 
-            // if (n > capacity() || n < 0)  
-            //     throw std::out_of_range("Ridiculous ! The index is out of range");
+            if (n > capacity() || n < 0)  
+                throw std::out_of_range("Ridiculous ! The index is out of range");
             return (this->_start[n]); 
         }
 
         const_reference operator[](size_type n) const 
         { 
-            // if (n > capacity() || n < 0)  
-            //     throw std::out_of_range("Ridiculous ! The index is out of range");
+            if (n > capacity() || n < 0)  
+                throw std::out_of_range("Ridiculous ! The index is out of range");
             return (this->_start[n]); 
         }
 
         reference at(size_type n)
         {
-            // if (n > _size || n < 0)
-            //     throw std::out_of_range("Ridiculous ! The index is out of range");
+            if (n > _size || n < 0)
+                throw std::out_of_range("Ridiculous ! The index is out of range");
             return (this->_start[n]);
         }
         const_reference at(size_type n) const
         {
-            // if (n > _size || n < 0)
-            //     throw std::out_of_range("Ridiculous ! The index is out of range");
+            if (n > _size || n < 0)
+                throw std::out_of_range("Ridiculous ! The index is out of range");
             return (this->_start[n]);
         }
         reference front(void) { return (this->_start[0]); }

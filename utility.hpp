@@ -15,7 +15,8 @@
             pair(void): first(first_type()), second(second_type()) {return ;}
             pair(const pair &pr) : first(pr.first), second(pr.second){}
             pair(const first_type &a, const second_type &b) : first(a), second(b) {}
-            pair &operator=(const pair &pr) {first = pr.first; second = pr.second; return *this;}
+            
+            pair &operator=(const pair &pr) { first = pr.first; second = pr.second; return *this;}
 
             first_type first;
             second_type second;

@@ -7,19 +7,6 @@
 namespace ft
 {
 
-    template <typename T>
-    struct IteratorTraits
-    {
-        // Define the types for the iterator's value, difference, pointer, and reference.
-        typedef T value_type;
-        typedef typename std::ptrdiff_t difference_type;
-        typedef T *pointer;
-        typedef T &reference;
-
-        // Specify the iterator category as std::random_access_iterator_tag.
-        typedef std::random_access_iterator_tag iterator_category;
-    };
-
 
     // template <typename Iter>
     // struct iterator_traits

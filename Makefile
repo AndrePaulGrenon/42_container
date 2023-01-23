@@ -18,9 +18,9 @@ NAME = container #(Nom de L'exécutable)
 CC			=	c++
 FLAGS		=	-Wall -Wextra -Werror -std=c++98
 
-SRCS		=	main.cpp
+SRCS		=	mapmain.cpp
 
-HEADER_CON	=	vector.hpp iterators.hpp colours.hpp utils.hpp
+HEADER_CON	=	Map.hpp colours.hpp utility.hpp biditerator.hpp tree_algo.hpp 
 HEADER_TEM	=	
 HEADER_ITE	=
 
