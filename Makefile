@@ -20,7 +20,7 @@ FLAGS		=	-Wall -Wextra -Werror -std=c++98
 
 SRCS		=	mapmain.cpp
 
-HEADER_CON	=	Map.hpp colours.hpp utility.hpp biditerator.hpp tree_algo.hpp 
+HEADER_CON	=	Map.hpp colours.hpp utility.hpp biditerator.hpp tree_algo.hpp redblack_algo.hpp
 HEADER_TEM	=	
 HEADER_ITE	=
 

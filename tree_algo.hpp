@@ -1,9 +1,106 @@
 #ifndef TREE_ALGO_H
 #define TREE_ALGO_H
 
+#include "colours.hpp"
+
 namespace ft
 {
+
+    //Checks if uncle node has two black child and returns true
+    template <class node>
+    bool    ft_sibling_has_black_children(node *grandPa, node *self)
+    {
+        node *daddy; 
+        
+        if (grandPa->left != self)
+            daddy = grandPa->left;
+        else
+            daddy = grandPa->right;
+        if ((daddy->left == NULL || !daddy->left->_isRed) 
+                && (daddy->right == NULL || !daddy->right->_isRed))
+            return true;
+        return false;
+    }
+
+    //Checks for the correct rotation to take in the context of an insertion
+    //Used by Red Black Tree;
+    template<class node>
+    node    *ft_choose_rotation(node *grandPa, node *daddy, node *child)
+    {
+        if (grandPa->left == daddy && daddy->right == child)
+        {
+            grandPa->left = LeftRotation(daddy);
+            return (RightRotation(grandPa));
+        }
+        if (grandPa->left == daddy && daddy->left == child)
+            return (RightRotation(grandPa));
+        if (grandPa->right == daddy && daddy->left == child)
+        {
+            grandPa->right = RightRotation(daddy);
+            return (LeftRotation(grandPa));
+        }
+        if (grandPa->right == daddy && daddy->right == child)
+            return (LeftRotation(grandPa));
+        return (NULL);
+    }
+
+    //Checks if node daddy has a sibbling and it is red, returns true
+    // otherwise returns false. Used by red black tree
+    template <class node>
+    bool    ft_uncle_isRed(node *grandPa, node *daddy)
+    {
+        if (grandPa->left != NULL && grandPa->left != daddy)
+            return grandPa->left->_isRed;
+        if (grandPa->right != NULL && grandPa->right != daddy)
+            return grandPa->right->_isRed;
+        return false;
+    }
+
+    //checks if brother of child is red, returns true
+    template <class node>
+    bool    ft_brother_isRed(node *daddy, node *child)
+    {
+        if (daddy->right == NULL && daddy->left == NULL)
+            return false;
+        if (daddy->right != child && daddy->right != NULL)
+            return (daddy->right->_isRed);
+        if (daddy->left != child && daddy->left != NULL)
+            return (daddy->left->_isRed);
+        return false;
+    }
+
+    template <class node>
+    void    ft_switch_colour(node *redParent)
+    {
+        if (redParent == NULL)
+            return ;
+        if (redParent->_isRed)
+        {
+            redParent->_isRed = false;
+            if (redParent->left != NULL)
+            {
+                // if (redParent->right->right != NULL)
+                //     redParent->right->right->_isRed = false;
+                // if (redParent->right->left != NULL)
+                //     redParent->right->left->_isRed = false;
+                redParent->left->_isRed = true;
+            }
+            if (redParent->right != NULL)
+            {
+                // if (redParent->right->right != NULL)
+                //     redParent->right->right->_isRed = false;
+                // if (redParent->right->left != NULL)
+                //     redParent->right->left->_isRed = false;   
+                redParent->right->_isRed = true;
+            }
+        }
+            std::cout << RED "COlour is switched " CLEAR << std::endl;
+        return;
+    }
+
+ 
     //Recursively calculates the height of a tree
+    //Used by Avl tree; 
     template <class node>
     int  treeHeight(node *nod)
     {
@@ -23,20 +120,23 @@ namespace ft
     {
         node temp;
 
+        // std::cout << BYEL " RIGHT ROTATION " CLEAR << std::endl;
         temp.left = nod->left;
         
         nod->left = temp.left->right;
         temp.left->right = nod;
-        
         return temp.left;
     }
 
+    //Right rigtht Rotation - Left Rotation
     template<class node>
     node    *LeftRotation(node *nod)
     {
         node temp;
 
+        // std::cout << BYEL " LEFT ROTATION " CLEAR << std::endl;
         temp.right = nod->right;
+        
         nod->right = temp.right->left;
         temp.right->left = nod;
         return temp.right;
@@ -55,49 +155,6 @@ namespace ft
         return 0;
     }
 
-    //DELETION operation for a node with one Edge. Returns the child node. 
-    template <class node>
-    node    *ft_one_edge(node *toDelete)
-    {
-        node    *temp;
-            
-        std::cout << "     -One edge Deletion case" << std::endl;
-        if (toDelete->right == NULL)
-            temp = toDelete->left;
-        else
-            temp = toDelete->right;
-        delete toDelete;
-        return (temp);
-    }
-
-    //DELETION operation for a 2 edges node. Will replace this node with the..
-    // ..next highest value of its left tree
-    template <class node>
-    node    *ft_two_edges(node *toSwap)
-    {
-        node    *temp = toSwap->left;
-        node    *temp2;
-            
-        std::cout << "      -Two edge Deletion case" << std::endl;
-        //IF the left node has no right node
-        if (temp->right == NULL)
-        {
-            std::cout << "    easy remove" << std::endl;
-            temp->right = toSwap->right;
-            delete toSwap;
-            return temp;
-        }
-         std::cout << "    harder remove" << std::endl;
-        //IF the left node has some right nodes
-        while (temp->right->right)
-            temp = temp->right;
-        temp2 = temp->right;
-        temp->right = temp->right->left;
-        temp2->right = toSwap->right;
-        temp2->left = toSwap->left;
-        delete toSwap;
-        return temp2;
-    }
 }
 
 #endif

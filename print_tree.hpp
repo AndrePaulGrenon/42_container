@@ -37,7 +37,7 @@ namespace ft
         }
         if (level == 1) 
         {
-            std::cout << root->_data.first;
+            std::cout << root->_data.first << (root->_isRed ? BRED "R" CLEAR : BBLK "B" CLEAR );
             std::cout << (isLeft ? "/ " : "\\ ");
 
         }
