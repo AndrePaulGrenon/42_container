@@ -4,6 +4,7 @@
 #pragma once
 
 #include <functional>
+#include <stdexcept>
 #include "biditerator.hpp"
 #include "utility.hpp"
 #include "iterators.hpp"
@@ -25,24 +26,29 @@ namespace ft
     {
         typedef Key key_type;
         typedef T   mapped_type;
+        typedef ft::pair<const key_type, mapped_type>                   value_type;
 
-        node() : _data(ft::pair<const Key, T>()), left(NULL), right(NULL), _isRed(true) {}
-        node(ft::pair<const Key, T> data) : _data(data), left(NULL), right(NULL), _isRed(true) {}
-        node(ft::pair<const Key, T> data, bool isRed) : _data(data), left(NULL), right(NULL) , _isRed(isRed){}
+        node() : _data(ft::pair<const Key, T>()), left(NULL), right(NULL), _isRed(true), _endNode(true), the_end(NULL) {}
+        node(ft::pair<const Key, T> data) : _data(data), left(NULL), right(NULL), _isRed(true), _endNode(false) {}
+        node(ft::pair<const Key, T> data, bool isRed) : _data(data), left(NULL), right(NULL) , _isRed(isRed), _endNode(false){}
         node    &operator=(const node &no) {_data = no._data; left = no.left; right = no.right;
-            _isRed = no._isRed;}
+            _isRed = no._isRed; _endNode = no._end; return this;}
         ~node() {}
-        ft::pair<const Key, T> _data;
+
+        value_type _data;
         node *left;
         node *right;
         node **root;
         bool _isRed;
+        bool _endNode;
+        node *the_end;
+        
     };
 
-    template <class Key, class T, class Compare = std::less<Key>, class Allocator = std::allocator<node<const Key, T> > >
+    template <class Key, class T, class Compare = std::less<Key>, 
+            typename Allocator = std::allocator<ft::pair<const Key, T> > >
     class Map
     {
-
         //------------------------------------------------------------------------------
         //   |------------|
         //   |DEFINITIONS |
@@ -53,12 +59,15 @@ namespace ft
 
         typedef Key                                                     key_type;
         typedef T                                                       mapped_type;
-        typedef ft::pair<const key_type, mapped_type>                   value_type;
+
+        typedef pair<const Key, T>                                      value_type;
+        
         typedef Compare                                                 key_compare;
         typedef Allocator                                               allocator_type;
         typedef ptrdiff_t                                               difference_type;
         typedef size_t                                                  size_type;
-        typedef node<const key_type, mapped_type>                             node;
+
+        typedef node<key_type, mapped_type>                       node;
 
         typedef typename allocator_type::reference                      reference;
         typedef typename allocator_type::const_reference                const_reference;
@@ -66,7 +75,8 @@ namespace ft
         typedef typename allocator_type::const_pointer                  const_pointer;
 
         typedef typename ft::bidirectional_iterator<node>               iterator;
-        typedef typename ft::bidirectional_iterator<const node>         const_iterator;
+        typedef typename ft::const_bidirectional_iterator<const node>                  const_iterator;
+        // typedef typename ft::bidirectional_iterator<node>         const_iterator;
         typedef typename ft::reverse_iterator<iterator>                 reverse_iterator; 
         typedef typename ft::reverse_iterator<const_iterator>           const_reverse_iterator;
         
@@ -99,27 +109,28 @@ namespace ft
         // ------------------------------------------------------------------------------
 
         explicit Map(const key_compare& comp = key_compare(), const allocator_type& alloc = allocator_type()) :
-            _root(NULL), comp(comp), _m_alloc(alloc) , _size(0)
+            _root(NULL), comp(comp), _m_alloc(alloc) , _size(0), _end()
         {
-
+            _end.root = &_root;
         }
 
         template <class InputIterator>  
         Map (InputIterator first, InputIterator last,
             const key_compare& comp = key_compare(), const allocator_type& alloc = allocator_type()) :
-            _root(NULL), comp(comp), _m_alloc(alloc), _size(0)
+            _root(NULL), comp(comp), _m_alloc(alloc), _size(0), _end()
         {
+            _end.root = &_root;
             for (; first != last; first++)
             {
                 insert(*first);
-                _size++;
             }
         }
 
-        Map(const Map &x) : _root(NULL), comp(x.comp), _m_alloc(x._m_alloc), _size(0)
+        Map(const Map &x) : _root(NULL), comp(x.comp), _m_alloc(x._m_alloc), _size(0), _end()
         {
-            iterator begin = x.begin();
-            iterator end = x.end();
+            _end.root = &_root;
+            const_iterator begin = x.begin();
+            const_iterator end = x.end();
 
             for (; begin != end; begin++)
             {
@@ -148,6 +159,7 @@ namespace ft
             while (_root != NULL)
                 erase(_root->_data.first);
             insert(other.begin(), other.end());
+            return (*this);
         }
 
         //------------------------------------------------------------------------------
@@ -167,6 +179,7 @@ namespace ft
             node            *_daddy_sent;
             node            *_child_sent;
             node            *_new_insert;
+            node            _end;
            
             bool            simul_over;
             bool            double_black;
@@ -186,14 +199,79 @@ namespace ft
             node *temp = _root;
             while (temp->left)
                 temp = temp->left;
+
             return iterator (temp);
         }
 
-        iterator    end(void)
+        const_iterator    begin(void) const
         {
-            return iterator(NULL);
+            if (_root == NULL)
+                return end();
+            node *temp = _root;
+            while (temp->left)
+                temp = temp->left;
+
+            return const_iterator (temp);
+        }
+
+        iterator    end(void)
+        { 
+            return iterator(&_end);
+        }
+
+        const_iterator    end(void) const
+        {
+            return const_iterator(&_end);
+        }
+
+        reverse_iterator rbegin(void) { return reverse_iterator(this->end()); }
+        reverse_iterator rend(void) { return reverse_iterator(this->begin()); }
+        const_reverse_iterator rbegin(void) const { return const_reverse_iterator(this->end()); }
+        const_reverse_iterator rend(void) const { return const_reverse_iterator(this->begin()); }
+
+        //------------------------------------------------------------------------------
+        //   |------------------|
+        //   | ELEMENT  ACCESSS |
+        //   |------------------|
+        //------------------------------------------------------------------------------
+
+        mapped_type& operator[] (const key_type& k) 
+        { 
+            node* it = ft_find(_root, k);
+            if (it == NULL)
+            {
+                insert(value_type(k, mapped_type()));
+                node* it = ft_find(_root, k);
+                return (it->_data.second);
+            }
+            return (it->_data.second);
+        }
+    
+        mapped_type& at (const key_type& k)
+        {
+            node* it = ft_find(_root, k);
+            if (it == NULL)
+                throw std::out_of_range("Item does not exists !") ;
+            return (it->_data.second);
         }
         
+        const mapped_type& at (const key_type& k) const
+        {
+            node* it = ft_find(_root, k);
+            if (it == NULL)
+                throw std::out_of_range("Item does not exists !") ;
+            return (it->_data.second);
+        }
+
+        //------------------------------------------------------------------------------
+        //   |-------------------|
+        //   |CAPACITY  FUNCTIONS|
+        //   |-------------------|
+        //------------------------------------------------------------------------------
+
+        bool        empty() const { if (_root == NULL) return true; return false;}
+
+        size_type   size() const { return _size;}
 
         //------------------------------------------------------------------------------
         //   |-------------------|
@@ -203,18 +281,22 @@ namespace ft
 
         //            a. INSERT 
 
-        ft::pair<iterator, bool> insert(const value_type& val) 
+        ft::pair<iterator, bool> insert(const value_type& val)
         {
             sent_null();
             simul_over = false;
             if (_root == NULL)
             {
-                _root = create(val, false);
+                _root = create(val);
+                _root->_isRed = false;
                 return ft::pair<iterator, bool>(iterator(_root),true) ;
             }
             ft::pair<iterator, bool> answer = check_node(_root, val);
             _root = RB_tree_balancing(_root);
-            _size++;
+            //If Insertion successful, size is incremented 
+            if (answer.second == true)
+                _size++;
+            
             return (answer);
         }
 
@@ -224,15 +306,16 @@ namespace ft
             simul_over = false;
             if (_root == NULL)
             {
-                _root = create(val, false);
+                _root = create(val);
+                _root->_isRed = false;
                 return iterator(_root);
             }
             if ((position.base()->_isRed))
                 insert(val);
-
             ft::pair<iterator, bool> answer = check_node(position.base(), val);
             _root = RB_tree_balancing(_root);
-            _size++;
+            if (answer.second == true)
+                _size++;
             if (position->left->_data.first == val.first)
                 return iterator(position->left);
             return iterator (position->right);
@@ -241,8 +324,11 @@ namespace ft
         template<class InputIterator>
         void insert(InputIterator first, InputIterator last) 
         {
+
+            // sstd::cout << "INSERT with 2 ITERATORS first last" << std::endl;
             for (; first != last; first++)
             {
+                // std::cout << (*first).first << std::endl;
                 insert(*first);
             }
             return ;
@@ -258,12 +344,9 @@ namespace ft
         size_type   erase (const key_type& k)
         {
             sent_null();
-            // bool isRed = _root->_isRed;
-            // std::cout << BRED "KEY is : [" << k << "]" CLEAR << std::endl;
             size_type val = deletes(_root, k);
-            // delete_RB_balancing(_root, isRed);
-            // Put AVL balancing function instead; 
-            // _root = AVL_tree_balancing(_root); 
+            if (val > 0)
+                _size--;
             return (val);
         }
 
@@ -331,10 +414,85 @@ namespace ft
             return const_iterator(ft_find(_root, key));
         }
 
-        iterator lower_bound( const Key& key )
+        node    *ft_find_bound(node *current , const key_type& key) const 
         {
-            (void) key;
+            if (current == NULL)
+                return NULL;
+            if (current->_data.first == key)
+                return current;
+            if (!comp(current->_data.first, key) && (current->left == NULL || comp(current->left->_data.first, key)))
+            {
+                node *temp = ft_find_bound(current->left, key);
+                if (temp == NULL)
+                    return (current);
+                return temp;
+            }
+            if (comp(current->_data.first, key))
+                return (ft_find_bound(current->right, key));
+            if (!comp(current->_data.first, key))
+                return (ft_find_bound(current->left, key));
+            return (NULL);
         }
+
+        iterator    lower_bound(const Key& key)
+        {
+            return iterator(ft_find_bound(_root, key));
+        }
+
+        const_iterator  lower_bound(const Key& key) const
+        {
+            return const_iterator(ft_find_bound(_root, key));
+        }
+
+        iterator upper_bounds(const Key& key)
+        {
+            node *temp = ft_find_bound(_root, key);
+            if (temp == NULL)
+                return iterator(NULL);
+            if (temp->_data.first == key)
+            {
+                iterator it(temp);
+                ++it;
+                return it;
+            }
+            return iterator(temp);
+        }
+
+        const_iterator  upper_bounds(const Key& key) const
+        {
+            node *temp = ft_find_bound(_root, key);
+            if (temp == NULL)
+                return iterator(NULL);
+            if (temp->_data.first == key)
+            {
+                iterator it(temp);
+                ++it;
+                return it;
+            }
+            return iterator(temp);
+        }
+
+        pair<iterator,iterator> equal_range (const key_type& k)
+        {
+            iterator temp(lower_bound(k));
+            
+            if ((*temp).first != k)
+                return pair<iterator, iterator>(temp, temp);
+            iterator temp2(temp);
+            temp2++;
+            return ft::pair<iterator, iterator>(temp, temp2);
+        }
+
+        //----------------------------------------------------------
+        //   |-----------------|
+        //   |OBSERVER FUNCTION|
+        //   |-----------------|
+        // ----------------------------------------------------------
+
+        key_compare key_comp() const { return comp;}
+
+        value_compare    value_comp() const {return value_compare(comp);}    
+
 
         //----------------------------------------------------------
         //   |-----------------|
@@ -344,18 +502,22 @@ namespace ft
 
     private: 
 
-        node    *create(const value_type &data, bool isRed) 
+        node    *create(const value_type &data) 
         {
-            std::cout << "   --Inserted key :" << data.first << " with val : " << data.second << std::endl;
+            // std::cout << "   --Inserted key :" << data.first << " with val : " << data.second << std::endl;
             
             // node *newnode = new node(data, isRed);
-            node *newnode = _m_alloc.allocate(1);
-            _m_alloc.construct(newnode, data, isRed);
+            node *newnode = new node(data);
+            // _m_alloc.allocate(1);
+            // _m_alloc.construct(newnode, data, isRed);
             // newnode->_isRed = isRed;
             if (_root == NULL)
-                newnode->root = &newnode;
+            {
+                newnode->root = &_root;
+            }
             else
                 newnode->root = &_root;
+            newnode->the_end = &_end;
             _papa_sent = newnode;
             return newnode;
         }
@@ -414,9 +576,6 @@ namespace ft
             if (_child_sent && _child_sent->_isRed && _daddy_sent->_isRed 
                 && (_new_insert == NULL || _new_insert == _child_sent)) // Checks one out of 2 times
             {
-                std::cout <<RED " Grandather :  " << _papa_sent->_data.first << MAG " Daddy is :" 
-                << _daddy_sent->_data.first << YEL " Child is : " << _child_sent->_data.first 
-                << CLEAR << std::endl;
                 if (ft_uncle_isRed(nod, _daddy_sent))
                 {
                     nod->left->_isRed = false;
@@ -452,8 +611,7 @@ namespace ft
                 //Creates node or goes down the right path
                 if (nod->right == NULL)
                 {
-                    std::cout << std::endl << "FATHER key :" << nod->_data.first << std::endl << " RIGHT: "<< "  - ";
-                    nod->right = create(val, true);
+                    nod->right = create(val);
                     nod->left = RB_tree_balancing(nod->left); // not sure if useful IN AVL 
                     nod->right = RB_tree_balancing(nod->right); // not sure if useful IN AVL
                     _papa_sent = nod;
@@ -474,8 +632,8 @@ namespace ft
                 //Creates node or goes down the left path
                 if (nod->left == NULL)
                 {
-                    std::cout << std::endl << "Father key :" << nod->_data.first << std::endl << " LEFT: ";
-                    nod->left = create(val, true);
+                    // std::cout << std::endl << "Father key :" << nod->_data.first << std::endl << " LEFT: ";
+                    nod->left = create(val);
                     nod->left = RB_tree_balancing(nod->left); // not sure if useful IN AVL
                     nod->right = RB_tree_balancing(nod->right); // not sure if useful IN AVL
                     _papa_sent = nod;
@@ -489,7 +647,7 @@ namespace ft
                 _papa_sent = nod;
                 return (answer);
             }
-            std::cout << "  node : "<< nod->_data.first << RED " Balance Height : " CLEAR << ft::treeHeight(nod->left) << "  - "; 
+            // std::cout << "  node : "<< nod->_data.first << RED " Balance Height : " CLEAR << ft::treeHeight(nod->left) << "  - "; 
             return ft::pair<iterator, bool>(iterator(nod), false);
         }
 
@@ -518,21 +676,16 @@ namespace ft
             node    *temp = toSwap->left;
             node    *temp2;
 
-            // std::cout << "Two Edge " << std::endl;
             _papa_sent = toSwap;
             _daddy_sent = temp;
             _child_sent = temp->right;
+
             //IF the left node has no right node
             if (temp->right == NULL)
             {
-                // std::cout << "Simple Route" << std::endl;
                 temp->right = toSwap->right;           
                 _child_sent = temp->left;
-                //  std::cout << " _daddy is : " << _daddy_sent->_data.first << std::endl;
                 _papa_sent = ft_find_parent(_root, _daddy_sent);
-                // if (_papa_sent != NULL)
-                // std::cout << " Find is  : " << _papa_sent->_data.first << std::endl;
-                // std::cout << " SEGFAULT  : "  << std::endl;
                 if (temp->_isRed == false)
                     double_black = true;
                 delete toSwap;
@@ -542,20 +695,11 @@ namespace ft
             //IF the left node has some right nodes
             while (temp->right->right)
             {
-                // std::cout << "Extra Hard Route" << std::endl;
                 _papa_sent = temp;
                 _daddy_sent = temp->right;
                 _child_sent = temp->right->right;
                 temp = temp->right;
             }
-                //             std::cout << BBLU ;
-                // std::cout << _papa_sent->_data.first << " [GRANDPA] :  " << std::endl;
-                // std::cout << _daddy_sent->_data.first << " [DADDY] :  " << std::endl;
-                // if (_child_sent != NULL)
-                //     std::cout << _child_sent->_data.first << " [CHILD] :  " << std::endl;
-                // else
-                //     std::cout << "[CHILD] is NULL " << std::endl;
-                // std::cout << CLEAR ;
             if (_papa_sent == toSwap)
                 _papa_sent = temp->right;
             if (_daddy_sent == toSwap)
@@ -835,7 +979,6 @@ namespace ft
             //check is left node the ONE
             if (nod->left && key == nod->left->_data.first)
             {
-                // std::cout << nod->left->_data.first << " [DELETED] :  ";
                 bool isRed = nod->left->_isRed;
                 if (!ft_n_edges(nod->left))
                 {
@@ -850,20 +993,15 @@ namespace ft
                 else if (ft_n_edges(nod->left) == 2)
                     nod->left = ft_two_edges(nod->left);
                 delete_RB_balancing(nod->left, isRed);//Checks and ajusts with RB tree rules
-                
                 return (1);
             }
            
             //CHECK if right node is the ONE
             if (nod->right && key == nod->right->_data.first)
             {
-                //Select 0 , 1 or 2 edges case
-                // std::cout << nod->right->_data.first << " [DELETED] :  ";
                 bool isRed = nod->right->_isRed;
                 if (!ft_n_edges(nod->right))
                 {
-                    // std::cout << "     -No edge Deletion case" << std::endl;
-                    // is double black 
                     if (!nod->right->_isRed)
                         double_black = true;
                     delete nod->right;
@@ -880,7 +1018,6 @@ namespace ft
             //IF Node is ROOT
             if (key == nod->_data.first)
             {
-                // std::cout << nod->_data.first << " [DELETED] : /ROOT  " ;
                 bool isRed = nod->_isRed;
                 if (!ft_n_edges(nod))
                 {
@@ -891,7 +1028,6 @@ namespace ft
                     _root = ft_one_edge(nod);
                 else if (ft_n_edges(nod) == 2)
                     _root = ft_two_edges(nod);
-                // _child_sent = _root;
                 delete_RB_balancing(_root, isRed); //Checks and ajusts with RB tree rules
                 return (1) ;
             }

@@ -5,6 +5,7 @@
 #include <iostream>
 #include <cstddef>
 #include <iterator>
+#include <type_traits>
 
 namespace ft
 {
@@ -313,14 +314,14 @@ namespace ft
         typename IteratorType::reference operator*() const
         {
             IteratorType temp = _current;
-            return (*(--temp));
+            return (*--temp);
         }
         
         pointer operator->() const
         {
             return &(operator*());
         }
-
+        
         reverse_iterator &operator++()
         {
             --_current;

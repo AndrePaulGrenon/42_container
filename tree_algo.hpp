@@ -78,27 +78,13 @@ namespace ft
         {
             redParent->_isRed = false;
             if (redParent->left != NULL)
-            {
-                // if (redParent->right->right != NULL)
-                //     redParent->right->right->_isRed = false;
-                // if (redParent->right->left != NULL)
-                //     redParent->right->left->_isRed = false;
                 redParent->left->_isRed = true;
-            }
             if (redParent->right != NULL)
-            {
-                // if (redParent->right->right != NULL)
-                //     redParent->right->right->_isRed = false;
-                // if (redParent->right->left != NULL)
-                //     redParent->right->left->_isRed = false;   
                 redParent->right->_isRed = true;
-            }
         }
-            std::cout << RED "COlour is switched " CLEAR << std::endl;
         return;
     }
 
- 
     //Recursively calculates the height of a tree
     //Used by Avl tree; 
     template <class node>
@@ -120,7 +106,6 @@ namespace ft
     {
         node temp;
 
-        // std::cout << BYEL " RIGHT ROTATION " CLEAR << std::endl;
         temp.left = nod->left;
         
         nod->left = temp.left->right;
@@ -134,7 +119,6 @@ namespace ft
     {
         node temp;
 
-        // std::cout << BYEL " LEFT ROTATION " CLEAR << std::endl;
         temp.right = nod->right;
         
         nod->right = temp.right->left;

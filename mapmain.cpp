@@ -8,48 +8,59 @@ int main(void)
     ft::Map<std::string, int > ap;
     ft::Map<int, int > ape;
 
-    // ape.insert(ft::pair<const int, int> ( 10, 666));
-    // ape.insert(ft::pair<const int, int> (5, 666));
-    // ape.insert(ft::pair<const int, int> (50, 777));
-    // ape.insert(ft::pair<const int, int> (-5, 123));
-    // ft::printLevelOrder(ape._root);
-    // ape.insert(ft::pair<const int, int> (-30, 123));
-    // ape.insert(ft::pair<const int, int> (30, 123));
-    // ape.insert(ft::pair<const int, int> (70, 123));
-    // ape.insert(ft::pair<const int, int> (-40, 123));
-    // ape.insert(ft::pair<const int, int> ( -20, 123));
-    // ape.insert(ft::pair<const int, int> (33, 123));
-    // ape.insert(ft::pair<const int, int> (37, 123));
-    // ape.insert(ft::pair<const int, int> (78, 123));
-    // ape.insert(ft::pair<const int, int> (-41, 123));
-    // ape.insert(ft::pair<const int, int> ( -22, 123));
-    // ape.insert(ft::pair<const int, int> (15, 123));
-    // ape.insert(ft::pair<const int, int> (50, 123));
-    // ape.insert(ft::pair<const int, int> (40, 123));
-    // ape.insert(ft::pair<const int, int> (-45, 123));
-    // ape.insert(ft::pair<const int, int> (-15, 123));
-    // ape.insert(ft::pair<const int, int> (55, 123));
-    // ape.insert(ft::pair<const int, int> (75, 123));
-    // ape.insert(ft::pair<const int, int> (-47, 123));
-    // ape.insert(ft::pair<const int, int> (-42, 123));
-    
-    
-    ape.insert(ft::make_pair(3,4));
+    ape.insert(ft::pair<const int, int> (10, 666));
+
+    ape.insert(ft::pair<const int, int> (5, 666));
+    ape.insert(ft::pair<const int, int> (50, 777));
+    ape.insert(ft::pair<const int, int> (-5, 123));
+    ft::printLevelOrder(ape._root);
+    ape.insert(ft::pair<const int, int> (-30, 123));
+    ape.insert(ft::pair<const int, int> (30, 123));
+    ape.insert(ft::pair<const int, int> (70, 123));
+    ape.insert(ft::pair<const int, int> (-40, 123));
+    ape.insert(ft::pair<const int, int> ( -20, 123));
+    ape.insert(ft::pair<const int, int> (33, 123));
+    ape.insert(ft::pair<const int, int> (37, 123));
+    ape.insert(ft::pair<const int, int> (78, 123));
+    ape.insert(ft::pair<const int, int> (-41, 123));
+    ape.insert(ft::pair<const int, int> ( -22, 123));
+    ape.insert(ft::pair<const int, int> (15, 123));
+    ape.insert(ft::pair<const int, int> (50, 123));
+    ape.insert(ft::pair<const int, int> (40, 123));
+    ape.insert(ft::pair<const int, int> (-45, 123));
+    ape.insert(ft::pair<const int, int> (-15, 123));
+    ape.insert(ft::pair<const int, int> (55, 123));
+    ape.insert(ft::pair<const int, int> (75, 123));
+    ape.insert(ft::pair<const int, int> (-47, 123));
+    ape.insert(ft::pair<const int, int> (-42, 123));
 
 
     //TEST ITERATORS WITH ERASE
     
-    for (size_t i = 100; i > 0; i--)
-    {
-       ape.insert(ft::pair<const int, int> (i, 123));
-    }
+    // for (size_t i = 100; i > 0; i--)
+    // {
+    //    ape.insert(ft::pair<const int, int> (i, 123));
+    // }
     ft::printLevelOrder(ape._root);
 
-    std::cout << BRED << "IS 3 found ? : " << ape.count(3) << std::endl;
-    std::cout << BRED << "IS 69 found ? : " << ape.count(69) << std::endl;
-    std::cout << BRED << "IS -77 found ? : " << ape.count(-77) << std::endl;
+    std::cout << BRED << "IS 3 found ? : " CLEAR << ape.count(10) << std::endl;
+    std::cout << BRED << "IS 69 found ? : " CLEAR << ape.count(55) << std::endl;
+    std::cout << BRED << "IS -77 found ? : " CLEAR << ape.count(-77) << std::endl;
     
-    // ft::Map<const int, int>::iterator it = ape.begin();
+    ft::Map<int, int>::iterator it = ape.lower_bound(36);
+
+    std::cout << "  Number: " << (*it).first ;
+    it = ape.upper_bounds(40);
+    std::cout << "  Number: " << (*it).first << std::endl ;
+
+    ft::pair<ft::Map<int, int>::iterator, ft::Map<int, int>::iterator> a;
+
+    a = ape.equal_range(5);
+
+    std::cout << " Equal range: " << (*a.second).first << std::endl;
+
+
+    // ft::Map<int, int>::iterator it = ape.begin();
     // for (size_t i = 0; i < 20; i++)
     // {
     //     it++;

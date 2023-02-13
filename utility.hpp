@@ -13,7 +13,12 @@
             typedef T2 second_type;
 
             pair(void): first(first_type()), second(second_type()) {return ;}
-            pair(const pair &pr) : first(pr.first), second(pr.second){}
+
+            template<typename U1, typename U2>
+            pair(const pair<U1, U2> &pr) : first(pr.first), second(pr.second){}
+
+            pair(const pair<first_type, second_type> &other) : first(other.first), second(other.second){}
+            
             pair(const first_type &a, const second_type &b) : first(a), second(b) {}
             
             pair &operator=(const pair &pr) { first = pr.first; second = pr.second; return *this;}
@@ -22,12 +27,6 @@
             second_type second;
         };
         
-        template <typename T1, typename T2>
-        pair<T1, T2> make_pair(T1 x, T2 y)
-        {
-            return pair<T1, T2>(x, y);
-        }
-
         template <typename T1, typename T2>
         inline bool operator==(const pair<T1, T2>& lhs, const pair<T1, T2>& rhs)
         {
@@ -63,6 +62,14 @@
         {
             return !(lhs < rhs);
         }
+
+        //MAKE PAIR
+        template <typename T1, typename T2>
+        pair<T1, T2> make_pair(T1 x, T2 y)
+        {
+            return pair<T1, T2>(x, y);
+        }
+
 
         //SIMPLE ALGORITHMS
         template <class T>  
